@@ -3,10 +3,9 @@ import numpy as np
 
 def bin(label: np.ndarray):
     label_copy = label.copy()
-    label_copy[label <= 30] = 0
-    label_copy[(label_copy > 30) & (label_copy <= 60)] = 1
-    label_copy[(label_copy > 60) & (label_copy <= 180)] = 2
-    label_copy[(label_copy > 180) & (label_copy <= 300)] = 3
-    label_copy[label_copy > 300] = 4
+    label_copy[label <= 15] = 0
+    label_copy[(label_copy > 15) & (label_copy <= 45)] = 1
+    label_copy[(label_copy > 45) & (label_copy <= 105)] = 2
+    label_copy[label_copy > 105] = 3
 
     return label_copy
