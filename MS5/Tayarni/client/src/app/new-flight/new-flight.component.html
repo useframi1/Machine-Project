@@ -1,0 +1,74 @@
+<div class="container mt-4">
+    <p class="fs-2 text-uppercase fw-medium text-info">Add a new flight</p>
+    <form #loginForm="ngForm" class="mt-4 pb-5" (ngSubmit)="save()">
+        <div class="col-lg-6 form-group mb-4">
+            <label for="inputDate" class="form-label">Flight date</label>
+            <input name="date" [(ngModel)]="model.date" type="text" placeholder="ex: 2019-04-12"
+                class="form-control form-control-lg" bsDatepicker #dp="bsDatepicker" [bsConfig]="bsConfig"
+                id="inputDate" autocomplete="off">
+        </div>
+        <div class="col-lg-6 form-group mb-4">
+            <div class="row">
+                <div class="col-sm-6">
+                    <label for="inputDeptime" class="form-label">Departure time</label>
+                    <timepicker name="depTime" [(ngModel)]="model.depTime" [ngModelOptions]="{standalone: true}">
+                    </timepicker>
+                </div>
+                <div class="col-sm-6">
+                    <label for="inputArrTime" class="form-label">Arrival time</label>
+                    <timepicker name="arrTime" [(ngModel)]="model.arrTime" [ngModelOptions]="{standalone: true}">
+                    </timepicker>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 form-group mb-4">
+            <div class="row">
+                <div class="col-sm-6">
+                    <label for="inputOrgAirport" class="form-label">Origin airport</label>
+                    <input name="orgAirport" [(ngModel)]="model.orgAirport" type="text"
+                        class="form-control form-control-lg" id="inputOrgAirport" list="orgAirportList">
+                    <datalist id="orgAirportList">
+                        <option *ngFor="let airport of airports" [value]="airport"></option>
+                    </datalist>
+
+                </div>
+                <div class="col-sm-6">
+                    <label for="inputDestAirport" class="form-label">Destination airport</label>
+                    <input name="destAirport" [(ngModel)]="model.destAirport" type="text"
+                        class="form-control form-control-lg" id="inputDestAirport" list="destAirportList">
+                    <datalist id="destAirportList">
+                        <option *ngFor="let airport of airports" [value]="airport"></option>
+                    </datalist>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 form-group mb-4">
+            <label for="inputAirline" class="form-label">Airline</label>
+            <input name="airline" [(ngModel)]="model.airline" type="text" class="form-control form-control-lg"
+                id="inputAirline" list="airlineList">
+            <datalist id="airlineList">
+                <option *ngFor="let airline of airlines" [value]="airline"></option>
+            </datalist>
+
+        </div>
+        <div class="col-lg-6 form-group mb-4">
+            <label for="inputTailNum" class="form-label">Tail Number</label>
+            <input name="tailNum" [(ngModel)]="model.tailNum" type="text" class="form-control form-control-lg"
+                id="inputTailNum" list="tailNumsList">
+            <datalist id="tailNumsList">
+                <option *ngFor="let tailNum of tailNums" [value]="tailNum"></option>
+            </datalist>
+        </div>
+        <div class="col-lg-6 form-group mb-4">
+            <label for="inputDistance" class="form-label">Distance (miles)</label>
+            <input name="distance" [(ngModel)]="model.distance" type="number" class="form-control form-control-lg"
+                id="inputDistance">
+        </div>
+        <div class="col-lg-6">
+            <div class="d-flex justify-content-end">
+                <button class="btn btn-info text-white me-3" type="submit">Save</button>
+                <button class="btn btn-secondary text-white" type="button" routerLink="/">Cancel</button>
+            </div>
+        </div>
+    </form>
+</div>
