@@ -5,8 +5,6 @@ namespace API.Entities;
 
 public partial class Training
 {
-    public int DayOfWeek { get; set; }
-
     public DateOnly Date { get; set; }
 
     public int ScheduledArrTime { get; set; }
@@ -22,8 +20,6 @@ public partial class Training
     public int Distance { get; set; }
 
     public int ScheduledDepTime { get; set; }
-
-    public int ScheduledElapsedTime { get; set; }
 
     public double DepTemperature { get; set; }
 

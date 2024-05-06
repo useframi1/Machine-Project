@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
+using API.DTOs;
 using API.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Newtonsoft.Json;
 
 namespace API.Data;
 
@@ -23,6 +27,74 @@ public partial class DataContext : DbContext
     public virtual DbSet<User> Users { get; set; }
 
     public virtual DbSet<UserPrediction> UserPredictions { get; set; }
+
+    public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
+    {
+        var addedEntities = ChangeTracker.Entries<Training>()
+            .Where(e => e.State == EntityState.Added)
+            .ToList();
+
+        int result = await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+
+        var optionsBuilder = new DbContextOptionsBuilder<SqliteDataContext>();
+        optionsBuilder.UseSqlite("Data source=apiCallTracker.db");
+
+        using var sqliteDataContext = new SqliteDataContext(optionsBuilder.Options);
+        // Get the current count from the tracker table
+        var tracker = await sqliteDataContext.ApiCallTracker.FirstOrDefaultAsync();
+        if (tracker == null)
+        {
+            tracker = new ApiCallTracker();
+            await sqliteDataContext.ApiCallTracker.AddAsync(tracker);
+        }
+
+        tracker.Count += addedEntities.Count;
+
+        // Check if a certain number of rows have been added
+        if (tracker.Count >= 1)
+        {
+            // Reset the count
+            tracker.Count = 0;
+
+#pragma warning disable 4014
+            Task.Run(() => CallLongRunningApi())
+                .ContinueWith(t =>
+                {
+                    if (t.IsFaulted)
+                    {
+                        // Log the exception
+                        var exception = t.Exception;
+                        // Handle the exception
+                        using var loggerFactory = LoggerFactory.Create(builder =>
+                        {
+                            builder.AddConsole();
+                        });
+                        ILogger logger = loggerFactory.CreateLogger<Program>();
+                        logger.LogError(exception, "An error occurred while calling the API.");
+                    }
+                });
+#pragma warning restore 4014
+        }
+
+        // Save the updated count
+        await sqliteDataContext.SaveChangesAsync();
+
+        return result;
+    }
+
+    private async Task CallLongRunningApi()
+    {
+        // Create a new instance of the SqliteDataContext
+        using var client = new HttpClient();
+        var response = await client.GetAsync("https://localhost:5001/api/model/train");
+        var r = await response.Content.ReadAsStringAsync();
+        using var loggerFactory = LoggerFactory.Create(builder =>
+                {
+                    builder.AddConsole();
+                });
+        ILogger logger = loggerFactory.CreateLogger<Program>();
+        logger.LogInformation(r);
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -122,7 +194,7 @@ public partial class DataContext : DbContext
 
         modelBuilder.Entity<UserPrediction>(entity =>
         {
-            entity.HasKey(e => new { e.Username, e.ScheduledDepTime, e.AirlineName, e.TailNum, e.Date }).HasName("PK__User_Pre__A0F16DCC20E6219D");
+            entity.HasKey(e => new { e.Username, e.ScheduledDepTime, e.Date }).HasName("PK__User_Pre__86FE9BD31D1DBDAC");
 
             entity.ToTable("User_Predictions");
 
@@ -130,9 +202,7 @@ public partial class DataContext : DbContext
                 .HasMaxLength(255)
                 .IsUnicode(false);
             entity.Property(e => e.AirlineName)
-                .HasMaxLength(255)
-                .IsUnicode(false);
-            entity.Property(e => e.TailNum)
+                .IsRequired()
                 .HasMaxLength(255)
                 .IsUnicode(false);
             entity.Property(e => e.DestAirport)
@@ -145,31 +215,35 @@ public partial class DataContext : DbContext
                 .HasMaxLength(255)
                 .IsUnicode(false)
                 .HasColumnName("Org_Airport");
+            entity.Property(e => e.TailNum)
+                .IsRequired()
+                .HasMaxLength(255)
+                .IsUnicode(false);
 
             entity.HasOne(d => d.AirlineNameNavigation).WithMany(p => p.UserPredictions)
                 .HasForeignKey(d => d.AirlineName)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__User_Pred__Airli__47A6A41B");
+                .HasConstraintName("FK__User_Pred__Airli__634EBE90");
 
             entity.HasOne(d => d.DestAirportNavigation).WithMany(p => p.UserPredictionDestAirportNavigations)
                 .HasForeignKey(d => d.DestAirport)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__User_Pred__Dest___4A8310C6");
+                .HasConstraintName("FK__User_Pred__Dest___662B2B3B");
 
             entity.HasOne(d => d.OrgAirportNavigation).WithMany(p => p.UserPredictionOrgAirportNavigations)
                 .HasForeignKey(d => d.OrgAirport)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__User_Pred__Org_A__498EEC8D");
+                .HasConstraintName("FK__User_Pred__Org_A__65370702");
 
             entity.HasOne(d => d.TailNumNavigation).WithMany(p => p.UserPredictions)
                 .HasForeignKey(d => d.TailNum)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__User_Pred__TailN__489AC854");
+                .HasConstraintName("FK__User_Pred__TailN__6442E2C9");
 
             entity.HasOne(d => d.UsernameNavigation).WithMany(p => p.UserPredictions)
                 .HasForeignKey(d => d.Username)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__User_Pred__Usern__46B27FE2");
+                .HasConstraintName("FK__User_Pred__Usern__625A9A57");
         });
 
         OnModelCreatingPartial(modelBuilder);

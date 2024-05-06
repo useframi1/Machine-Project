@@ -2,24 +2,19 @@
     <div class="col-lg-6">
         <h1 class="fw-bold text-uppercase text-info text-center">login</h1>
         <p class="h5 mt-3 text-center"><small class="text-body-secondary">Please login below.</small></p>
-        <form #loginForm="ngForm" class="mt-5" (ngSubmit)="login()">
+        <form [formGroup]="loginForm" class="mt-5" (ngSubmit)="loginForm.valid && login()">
             <div class="mb-3">
-                <label for="inputUsername" class="form-label">Username<span class="text-danger"> *</span></label>
-                <input name="username" [(ngModel)]="model.username" type="text" class="form-control form-control-lg"
-                    id="inputUsername" placeholder="" autocomplete="off">
+                <app-text-input [formControl]="$any(loginForm.controls['username'])"
+                    [label]="'Username'"></app-text-input>
             </div>
-            <div class="mb-5">
-                <label for="inputPassword" class="form-label">Password<span class="text-danger"> *</span></label>
-                <input name="password" [(ngModel)]="model.password" type="password" class="form-control form-control-lg"
-                    id="inputPassword" placeholder="">
+            <div class="mb-3">
+                <app-text-input [formControl]="$any(loginForm.controls['password'])" [label]="'Password'"
+                    [type]="'password'"></app-text-input>
             </div>
-            <div class="row gy-2 justify-content-center">
-                <div class="col-sm-2 d-flex justify-content-center">
-                    <button class="btn btn-info text-white fw-bold w-100" type="submit">Login</button>
-                </div>
-                <div class="col-sm-2 d-flex justify-content-center">
-                    <button class="btn btn-secondary w-100" type="button" routerLink="/">Cancel</button>
-                </div>
+            <div class="text-center mt-5">
+                <button [disabled]="!loginForm.valid" class="btn btn-info text-white fw-bold me-4"
+                    type="submit">Login</button>
+                <button class="btn btn-secondary" type="button" routerLink="/">Cancel</button>
             </div>
         </form>
     </div>

@@ -7,8 +7,6 @@ public partial class UserPrediction
 {
     public string Username { get; set; }
 
-    public int DayOfWeek { get; set; }
-
     public DateOnly Date { get; set; }
 
     public int ScheduledArrTime { get; set; }
@@ -24,8 +22,6 @@ public partial class UserPrediction
     public int Distance { get; set; }
 
     public int ScheduledDepTime { get; set; }
-
-    public int ScheduledElapsedTime { get; set; }
 
     public double DepTemperature { get; set; }
 

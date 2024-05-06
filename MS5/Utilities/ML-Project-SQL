@@ -58,7 +58,6 @@ PRIMARY KEY (Username)
 
 CREATE TABLE User_Predictions(
  Username varchar(255) NOT NULL,
- DayOfWeek int NOT NULL,
  Date  date NOT NULL,
  ScheduledArrTime  int NOT NULL, 
  AirlineName  varchar(255) NOT NULL,
@@ -67,7 +66,6 @@ CREATE TABLE User_Predictions(
  Dest_Airport  varchar(255) NOT NULL,
  Distance int NOT NULL, 
  ScheduledDepTime int NOT NULL,
- ScheduledElapsedTime int NOT NULL,
  DepTemperature float NOT NULL,
  DepWindSpeed  float NOT NULL,
  DepWindDirection float NOT NULL,
@@ -83,7 +81,7 @@ CREATE TABLE User_Predictions(
  IsDelayedPredicted BIT NOT NULL,
  IsDelayedActual BIT
  PRIMARY KEY (
- Username,ScheduledDepTime,AirlineName,TailNum,Date
+ Username,ScheduledDepTime,Date
  ),
  FOREIGN KEY (Username) REFERENCES Users(Username),
  FOREIGN KEY (AirlineName) REFERENCES Airlines(AirlineName),
