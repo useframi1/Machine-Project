@@ -4,12 +4,13 @@ import { Airport } from '../_models/airport';
 import { map } from 'rxjs';
 import { Airline } from '../_models/airline';
 import { TailNum } from '../_models/tailNum';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class FlightService {
-  baseUrl = 'https://localhost:5001/api/';
+  baseUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 
